@@ -93,7 +93,7 @@ def run_main_UI():
                 print()
 
             elif user_choice == 12:
-                view_projects_employees_UI()
+                manage_projects_employees_UI()
                 input("Press enter to return to the main menu")
                 print()
 
@@ -103,7 +103,7 @@ def run_main_UI():
                 print()
 
             elif user_choice == 14:
-                edit_projects_employees_UI()
+                view_projects_employees_UI()
                 input("Press enter to return to the main menu")
                 print()
                 
