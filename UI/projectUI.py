@@ -1,6 +1,7 @@
 from modules.projectLogic import get_projects
 from modules.database import get_session
 from modules.projectLogic import add_project
+from classes.projectClass import Project
 from datetime import datetime
 
 def view_projects():
@@ -154,10 +155,71 @@ Project pending addition:
             else:
                 print(f"Please make a valid selection")
 
-
 def edit_project_UI():
-    pass
+    project_list = get_projects()
+    if len(project_list) == 0:
+        print("There are no projects in the database to be updated")
+        return
+    
+    print("Updating projects")
+    while True:
+        view_projects()
+        print(f"Which project (1 to {len(project_list)}) would you like to update?")
+        user_choice = input("Your choice: ").strip()
+        try:
+            user_choice = int(user_choice) - 1 #converting user choice to index
 
+            if user_choice not in list(range(0, len(project_list))):
+                raise Exception("user choice out of range")
+            
+            chosen_project = project_list[user_choice][0]
+            chosen_project : Project
+
+            break
+        except Exception as ex:
+            print(ex)
+            print("Invalid choice. Please try again")
+            input("Press enter to continue")
+
+    while True:
+        print(f"\nUpdating project{chosen_project}\n")
+        print(f"""Enter a corresponding number to:
+    1 - update name
+    2 - update start date
+    3 - update end date
+    4 - update status
+""")    
+
+        user_choice = input("Your choice: ").strip()
+
+        try: 
+            user_choice = int(user_choice)
+            if user_choice not in list(range(1, 5)): #update this every time when adding more menu options
+                raise Exception
+            break
+
+        except:
+            print("Invalid choice")
+
+    if user_choice == 1:
+        while True:
+            new_name = input(f"{"Updated name": <11} ")
+            try: 
+                new_name = new_name.strip().capitalize()
+                if new_name == "":
+                    raise Exception("Please enter something\n")
+                break
+            except Exception as ex:
+                print(ex)
+                print("Please enter a valid name\n")
+                continue
+
+        with get_session() as session:
+            db_employee =  session.get(Employee, chosen_employee.id)
+            db_employee.name = new_name
+            session.commit()
+
+            print(f"Employee name updated to {new_name}")            
 def view_projects_employees_UI():
     pass
 
