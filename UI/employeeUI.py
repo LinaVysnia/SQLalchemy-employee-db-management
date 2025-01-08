@@ -2,7 +2,7 @@ from modules.employeeLogic import *
 from classes.employeeClass import Employee
 from classes.departmentClass import Department
 from modules.database import get_session as sessions
-from datetime import datetime, date
+from datetime import datetime
 
 def run_add_employee_UI():
     print("Adding a new employee\n")
@@ -58,7 +58,7 @@ def run_add_employee_UI():
                 continue
         
         while True:
-            start_date_string = input(f"{"Start date (YYYY MM DD)" : <11} ")
+            start_date_string = input(f"{"Start date (YYYY MM DD): " : <11} ")
             try: 
                 start_date = datetime.strptime(start_date_string, "%Y %m %d").date()
                 if start_date.year < 1900 or start_date.year > 2100:
@@ -170,6 +170,7 @@ def run_update_employee_UI():
                 raise Exception("user choice out of range")
             
             chosen_employee = employee_list[user_choice][0]
+            chosen_employee : Employee
 
             #handling the cases when employee doesnt have a department
             if employee_list[user_choice][1] != None:
@@ -190,13 +191,14 @@ def run_update_employee_UI():
     2 - update surname
     3 - update role
     4 - update salary
-    5 - update department""")
+    5 - update start date
+    6 - update department""")
         
         user_choice = input("Your choice: ").strip()
 
         try: 
             user_choice = int(user_choice)
-            if user_choice not in list(range(1, 6)): #update this every time when adding more menu options
+            if user_choice not in list(range(1, 7)): #update this every time when adding more menu options
                 raise Exception
             break
 
@@ -282,6 +284,26 @@ def run_update_employee_UI():
             print(f"Employee salary updated to {new_salary}")
 
     if user_choice == 5:
+
+        while True:
+            new_start_date_string = input(f"{"New start date (YYYY MM DD):" : <11} ")
+            try: 
+                new_start_date = datetime.strptime(new_start_date_string, "%Y %m %d").date()
+                if new_start_date.year < 1900 or new_start_date.year > 2100:
+                    raise Exception("Invalid date\n")
+                break
+            except Exception as ex:
+                # print(ex)
+                print("Please enter a valid date (format YYYY MM DD)\n")
+                continue
+
+        with sessions() as session:
+            db_employee =  session.get(Employee, chosen_employee.id)
+            db_employee.start_date = new_start_date
+            session.commit()
+            print(f"Employee start date updated to {new_start_date_string}")
+
+    if user_choice == 6:
 
         with sessions() as session:
             all_departments = session.execute(select(Department)).fetchall()
