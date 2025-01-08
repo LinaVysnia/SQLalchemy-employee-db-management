@@ -14,9 +14,10 @@ class Project(Base):
 
     def __str__(self):
         project_string=f"""
+{"Name":<20} {self.name}
 {"start date":<20} {self.start_date}
 {"end date":<20} {self.end_date}
-{"project status":<20} {(lambda x: "Active" if self.is_active else "Inactive")}
+{"project status":<20} {("Active" if self.is_active else "Inactive")}
 """
         return project_string
     
