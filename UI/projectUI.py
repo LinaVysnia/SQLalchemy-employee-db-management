@@ -2,7 +2,9 @@ from modules.projectLogic import get_projects
 from modules.database import get_session
 from modules.projectLogic import add_project
 from classes.projectClass import Project
+from classes.employeeClass import Employee
 from datetime import datetime
+from sqlalchemy import select
 
 def view_projects():
     projects = get_projects()
@@ -172,7 +174,7 @@ def edit_project_UI():
             if user_choice not in list(range(0, len(project_list))):
                 raise Exception("user choice out of range")
             
-            chosen_project = project_list[user_choice][0]
+            chosen_project = project_list[user_choice]
             chosen_project : Project
 
             break
@@ -215,16 +217,163 @@ def edit_project_UI():
                 continue
 
         with get_session() as session:
-            db_employee =  session.get(Employee, chosen_employee.id)
-            db_employee.name = new_name
+            db_project =  session.get(Project, chosen_project.id)
+            db_project.name = new_name
             session.commit()
+            print(f"Project name updated to {new_name}")   
 
-            print(f"Employee name updated to {new_name}")            
+    if user_choice == 2:
+        while True:
+            new_start_date_string = input(f"{"New start date (YYYY MM DD): " : <11} ")
+            try: 
+                new_start_date = datetime.strptime(new_start_date_string, "%Y %m %d").date()
+                if chosen_project.end_date != None:
+                    if new_start_date > chosen_project.end_date:
+                        print(f"Project start date must come before end date {chosen_project.end_date}")
+                        raise Exception("Invalid date\n")
+                    
+                if new_start_date.year < 1900 or new_start_date.year > 2100:
+                    raise Exception("Invalid date\n")
+                
+                break
+            except Exception as ex:
+                # print(ex)
+                print("Please enter a valid date (YYYY MM DD)\n")
+                continue
+        
+        with get_session() as session:
+            db_project =  session.get(Project, chosen_project.id)
+            db_project.start_date = new_start_date
+            session.commit()
+            print(f"Project start date updated to {new_start_date}") 
+        
+    if user_choice == 3:
+        while True:
+            new_end_date_string = input(f"{"New end date (YYYY MM DD): " : <11} ")
+            try: 
+                new_end_date = datetime.strptime(new_end_date_string, "%Y %m %d").date()
+                if chosen_project.start_date != None:
+                    if new_end_date < chosen_project.start_date:
+                        print(f"Project end date must come after the start date {chosen_project.start_date}")
+                        raise Exception("Invalid date\n")
+                    
+                if new_end_date.year < 1900 or new_end_date.year > 2100:
+                    raise Exception("Invalid date\n")
+                
+                break
+            except Exception as ex:
+                # print(ex)
+                print("Please enter a valid date (YYYY MM DD)\n")
+                continue
+        
+        with get_session() as session:
+            db_project =  session.get(Project, chosen_project.id)
+            db_project.end_date = new_end_date
+            session.commit()
+            print(f"Project end date updated to {new_end_date}") 
+
+    if user_choice == 4:
+        while True:
+            new_status_str = input(f"{"Updated status (Active/Inactive): " : <11} ").strip().capitalize()
+            if new_status_str == "Active" or new_status_str == "A":
+                new_status = 1
+                break
+            elif new_status_str == "Inactive" or new_status_str == "I":
+                new_status = 0
+                break
+            else:
+                print("Invalid selection! Please enter 'Active' or 'Inactive'")
+        
+        with get_session() as session:
+            db_project =  session.get(Project, chosen_project.id)
+            db_project.is_active = new_status
+            session.commit()
+            print(f"Project status updated to {new_status_str}") 
+
+def manage_projects_employees_UI():
+    project_list = get_projects()
+    if len(project_list) == 0:
+        print("There are no projects in the database to be manage")
+        return
+    
+    print("Managing projects")
+    while True:
+        view_projects()
+        print(f"Which project's employees (1 to {len(project_list)}) would you like to update?")
+        user_choice = input("Your choice: ").strip()
+        try:
+            user_choice = int(user_choice) - 1 #converting user choice to index
+
+            if user_choice not in list(range(0, len(project_list))):
+                raise Exception("user choice out of range")
+            
+            chosen_project = project_list[user_choice]
+            chosen_project : Project
+
+            break
+        except Exception as ex:
+            print(ex)
+            print("Invalid choice. Please try again")
+            input("Press enter to continue")
+    
+    while True:
+        print(f"\Managing project: {chosen_project}\n")
+        print(f"""Enter a corresponding number to:
+    1 - assign employees to the project
+    2 - unassign employees from the project
+""")
+        
+        user_choice = input("Your choice: ").strip()
+
+        try: 
+            user_choice = int(user_choice)
+            if user_choice not in list(range(1, 3)): #update this every time when adding more menu options
+                raise Exception
+            break
+
+        except:
+            print("Invalid choice")
+    
+    if user_choice == 1:
+        with get_session() as session:
+            statement = select(Employee).filter(Employee.project.id != chosen_project.id)
+            available_employees = session.execute(statement).scalars().all()\
+            
+        if available_employees:
+            print(f"{len(available_employees)} available employee(s) found\n")
+            i = 1
+            for employee in available_employees:
+                print(f"{i}. {employee}")
+                i += 1
+        else:
+            print("All employees are assigned to this project already\n")
+
+        print(f"Which employees (1 to {len(available_employees)}) would you like to assign to the project? (Choose many by separating them with ,)")
+        
+        #change logic to work with lists
+
+        user_choice = input("Your choice: ").strip()
+        try:
+            user_choice = int(user_choice) - 1 #converting user choice to index
+
+            if user_choice not in list(range(0, len(available_employees))):
+                raise Exception("user choice out of range")
+            
+            chosen_employee = available_employees[user_choice]
+            chosen_employee : Project
+
+        except Exception as ex:
+            print(ex)
+            print("Invalid choice. Please try again")
+            input("Press enter to continue")
+
+            #add logic to assign this employee to ch
+
+            
+
 def view_projects_employees_UI():
     pass
 
 def view_employees_projects_UI():
     pass
 
-def edit_projects_employees_UI():
-    pass
