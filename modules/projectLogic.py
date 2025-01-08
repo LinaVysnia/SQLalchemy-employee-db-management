@@ -10,8 +10,8 @@ def get_projects():
 
     return projects
 
-def add_project(name : str, start_date : date, end_date : date, status : bool):
-    new_project = Project(name = name, start_date = start_date, end_date = end_date, status = status)
+def add_project(name : str, start_date : date, end_date : date, is_active : bool):
+    new_project = Project(name = name, start_date = start_date, end_date = end_date, is_active = is_active)
     with sessions() as session:
         session.add(new_project)
         session.commit()
